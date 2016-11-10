@@ -9,6 +9,8 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 #include "display.h"
+#include "screen_bits.h"
+#include "screens.h"
 
 static void wait()
 {
@@ -37,18 +39,17 @@ void (*fn[])() = {
  */
 int main(void)
 {
-    int i = 0;
 
     /* Init board hardware. */
     BOARD_InitPins();
     BOARD_BootClockRUN();
     BOARD_InitDebugConsole();
 
+
     display_init();
-    while (fn[i] != NULL) {
-        fn[i++]();
-        wait();
-    }
+    
+    display_images(0);
+    wait();
 
     for(;;) { /* Infinite loop to avoid leaving the main function */
         __asm("NOP"); /* something to use as a breakpoint stop while looping */

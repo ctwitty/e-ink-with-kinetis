@@ -24,7 +24,7 @@ void display_images(enum screen_index index)
     u8g_FirstPage(&u8g);
 
     do {
-        u8g_DrawXBM(&u8g, 0, 0, 200, 200, images[index].bitmap);
+        u8g_DrawXBM(&u8g, 0, 0, images[index].w, images[index].h, (const uint8_t *)images[index].bitmap);
     } while (u8g_NextPage(&u8g));
 }
 
