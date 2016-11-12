@@ -88,23 +88,43 @@ void EPD_W21_SetRamPointer(unsigned char addrX,unsigned char addrY,unsigned char
 void EPD_W21_DispInit(void)
 {
 	EPD_W21_Write(GDOControl, sizeof(GDOControl));	// Pannel configuration, Gate selection
-    EPD_W21_Write(softstart, sizeof(softstart));	// voodoo
+	EPD_W21_Write(softstart, sizeof(softstart));	// voodoo
 	EPD_W21_Write(VCOMVol, sizeof(VCOMVol));		// VCOM setting
 	EPD_W21_Write(DummyLine, sizeof(DummyLine));	// dummy line per gate
 	EPD_W21_Write(Gatetime, sizeof(Gatetime));		// Gage time setting
 	EPD_W21_Write(RamDataEntryMode, sizeof(RamDataEntryMode));	// X increase, Y increase
 	EPD_W21_SetRamArea(0x00,0x18,0x00,0x00,0xc7,0x00);	// X-source area,Y-gage area
-    EPD_W21_SetRamPointer(0x00,0x00,0x00);	// set ram
+	EPD_W21_SetRamPointer(0x00,0x00,0x00);	// set ram
+}
+
+static void EPD_SPI_Init()
+{
+#if !USE_BITBANG_SPI
+  	uint32_t sourceClock;
+	spi_master_config_t masterConfig = {0};
+	// Configure SPI Hardware
+	SPI_MasterGetDefaultConfig(&masterConfig);
+	masterConfig.outputMode = kSPI_SlaveSelectAutomaticOutput;
+	masterConfig.polarity = kSPI_ClockPolarityActiveLow;
+	//masterConfig.polarity = kSPI_ClockPolarityActiveHigh;
+	masterConfig.phase = kSPI_ClockPhaseSecondEdge;
+	masterConfig.baudRate_Bps = 2000000;	// 2MHz
+	sourceClock = CLOCK_GetFreq(kCLOCK_BusClk);
+	SPI_MasterInit(SPI0, &masterConfig, sourceClock);
+	SPI_EnableFIFO(SPI0, false);
+#endif
 }
 
 void EPD_W21_Init(void)
 {
+
 	EPD_W21_BS_0;		// 4 wire spi mode selected
 
-	EPD_W21_RST_0;		// Module reset
-	driver_delay_xms(10000);
+	EPD_SPI_Init();
+
+	//driver_delay_xms(100);
 	EPD_W21_RST_1;
-	driver_delay_xms(10000);
+	//driver_delay_xms(100);
 
 	EPD_W21_DispInit();		// pannel configure
 }
@@ -185,7 +205,7 @@ void EPD_W21_WriteRAM(void)
 //Author:
 //Date	: 2011/12/24
 //-------------------------------------------------------
-void EPD_W21_WirteLUT(unsigned char *LUTvalue)
+void EPD_W21_WriteLUT(unsigned char *LUTvalue)
 {
 	EPD_W21_Write(LUTvalue, 31);
 }
