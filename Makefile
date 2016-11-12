@@ -1,7 +1,11 @@
 RM := rm -rf
 BUILD_BASE_DIR = build
 
-vpath %.c drivers board startup utilities source 
+BOARD=FRDM-KL43Z
+INCLUDES=-I$(BOARD)/startup -I$(BOARD)/board -Iutilities -I$(BOARD)/CMSIS -I$(BOARD)/drivers -std=gnu99
+FLASH_FILE=MKL43Z256xxx4_flash.ld
+
+vpath %.c $(BOARD)/drivers $(BOARD)/board $(BOARD)/startup utilities source 
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(strip $(C++_DEPS)),)
@@ -39,35 +43,35 @@ e-ink-with-kinetis.siz \
 ELF_SRCS += \
 ../e-ink-with-kinetis-test.elf 
 
-MODULES   := drivers utilities board source source/u8glib/dev source/u8glib startup
+MODULES   := $(BOARD)/drivers utilities $(BOARD)/board source source/u8glib/dev source/u8glib $(BOARD)/startup
 BUILD_DIR := $(addprefix $(BUILD_BASE_DIR)/,$(MODULES))
 C_SRCS    := $(foreach sdir,$(MODULES),$(wildcard $(sdir)/*.c))
 OBJS      := $(addprefix $(BUILD_BASE_DIR)/, $(C_SRCS:%.c=%.o))
 C_DEPS    := $(addprefix $(BUILD_BASE_DIR)/, $(C_SRCS:%.c=%.d))
 
 OBJS += \
-build/startup/startup_MKL43Z4.o \
-build/startup/system_MKL43Z4.o  \
+build/$(BOARD)/startup/startup_MKL43Z4.o \
+build/$(BOARD)/startup/system_MKL43Z4.o  \
 
 S_UPPER_SRCS += \
-build/startup/startup_MKL43Z4.S 
+build/$(BOARD)/startup/startup_MKL43Z4.S 
 
 S_UPPER_DEPS += \
-build/startup/startup_MKL43Z4.d 
+build/$(BOARD)/startup/startup_MKL43Z4.d 
 
 all: checkdirs e-ink-with-kinetis.elf secondary-outputs
 
-build/startup/%.o: startup/%.S
+build/$(BOARD)/startup/%.o: $(BOARD)/startup/%.S
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cross ARM GNU Assembler'
-	arm-none-eabi-gcc -mcpu=cortex-m0plus -mthumb -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -Wall  -g3 -x assembler-with-cpp -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -c -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=cortex-m0plus -mthumb -O3 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -Wall  -g3 -x assembler-with-cpp -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" -c -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
 e-ink-with-kinetis.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross ARM C++ Linker'
-	arm-none-eabi-g++ -mcpu=cortex-m0plus -mthumb -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -Wall  -g3 -T "MKL43Z256xxx4_flash.ld" -Xlinker --gc-sections -Wl,-no-wchar-size-warning,-Map,"e-ink-with-kinetis.map" -specs=nosys.specs -specs=nano.specs -Xlinker -z -Xlinker muldefs -o "e-ink-with-kinetis.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-g++ -mcpu=cortex-m0plus -mthumb -O3 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -Wall  -g3 -T $(FLASH_FILE) -Xlinker --gc-sections -Wl,-no-wchar-size-warning,-Map,"e-ink-with-kinetis.map" -specs=nosys.specs -specs=nano.specs -Xlinker -z -Xlinker muldefs -o "e-ink-with-kinetis.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -101,7 +105,7 @@ define make-goal
 $1/%.o: %.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cross ARM C Compiler'
-	arm-none-eabi-gcc -mcpu=cortex-m0plus -mthumb -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -Wall  -g3 -D"CPU_MKL43Z256VMP4" -Istartup -Iboard -Iutilities -ICMSIS -Idrivers -std=gnu99 -MMD -MP -MF"$$(@:%.o=%.d)" -MT"$$@" -c -o "$$@" "$$<"
+	arm-none-eabi-gcc -mcpu=cortex-m0plus -mthumb -O3 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -Wall  -g3 -D"CPU_MKL43Z256VMP4" $(INCLUDES) -std=gnu99 -MMD -MP -MF"$$(@:%.o=%.d)" -MT"$$@" -c -o "$$@" "$$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 endef
