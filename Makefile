@@ -103,10 +103,10 @@ secondary-outputs: $(SECONDARY_FLASH) $(SECONDARY_SIZE)
 
 define make-goal
 $1/%.o: %.c
-	@echo 'Building file: $<'
+	@echo 'Building file: $$<'
 	@echo 'Invoking: Cross ARM C Compiler'
 	arm-none-eabi-gcc -mcpu=cortex-m0plus -mthumb -O3 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -Wall  -g3 -D"CPU_MKL43Z256VMP4" $(INCLUDES) -std=gnu99 -MMD -MP -MF"$$(@:%.o=%.d)" -MT"$$@" -c -o "$$@" "$$<"
-	@echo 'Finished building: $<'
+	@echo 'Finished building: $$<'
 	@echo ' '
 endef
 
