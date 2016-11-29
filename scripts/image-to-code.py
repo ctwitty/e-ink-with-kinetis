@@ -10,11 +10,9 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 
 path = os.path.join(script_dir, "images")
 
-img_ext = ['jpg', 'bmp', 'png', 'gif']
+img_ext = ['.jpg', '.bmp', '.png', '.gif']
 images = [fn for fn in os.listdir(path)
               if any(fn.endswith(ext) for ext in img_ext)]
-
-images = os.listdir(path)
 
 out_path = os.path.join(script_dir, "generated")
 
