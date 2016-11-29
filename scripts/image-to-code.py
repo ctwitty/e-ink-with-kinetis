@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # Script to generate image header file
+# Add images directory in scripts and put images in that directory
 
 import os
 import argparse
@@ -8,6 +9,10 @@ import shutil
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
 path = os.path.join(script_dir, "images")
+
+img_ext = ['jpg', 'bmp', 'png', 'gif']
+images = [fn for fn in os.listdir(path)
+              if any(fn.endswith(ext) for ext in img_ext)]
 
 images = os.listdir(path)
 
